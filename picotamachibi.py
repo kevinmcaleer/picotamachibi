@@ -14,6 +14,9 @@ i2c = I2C(id=id, sda=sda, scl=scl)
 oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
 oled.init_display()
 
+health = 1
+happiness = 1
+sleepiness = 1
 
 def load_baby(oled):
     baby = Icon('baby.pbm', width=48, height=48, name="Baby")
@@ -63,20 +66,24 @@ tb.select(index, oled)
 cancel = False
 while True:
     key = input("v & b to move selection")
-    tb.unselect(index, oled)
+    if not cancel:
+        tb.unselect(index, oled)
     if key == "v":
         index -= 1
+        if index <0:
+            index = 6
+        
         cancel = False
     if key == "b":
         index += 1
+        if index == 7:
+            index = 0
         cancel = False
     if key == "m":
-        tb.unselect(index, oled)
+        # tb.unselect(index, oled)
         cancel = True
-    if index <0:
-        index = 6
-    if index == 7:
-        index = 0
+        index = -1
+    
     if not cancel:
         tb.select(index, oled)
     tb.show(oled)

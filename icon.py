@@ -94,8 +94,7 @@ class Icon():
                     image.pixel(x,y,1)
                 else:
                     image.pixel(x,y,0)
-                # image.pixel(x,y,~image.pixel(x,y))
-            
+                
         self.__image = image
         self.__invert = value
         print("Invert is", self.__invert)
