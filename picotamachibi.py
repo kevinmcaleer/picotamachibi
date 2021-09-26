@@ -3,6 +3,7 @@ from machine import I2C, Pin
 from ssd1306 import SSD1306_I2C
 from icon import Icon, Toolbar
 from time import sleep
+import framebuf
 
 sda = Pin(0)
 scl = Pin(1)
@@ -10,18 +11,18 @@ id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
 
-# food = food_icon
-# print(food)
 oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
 oled.init_display()
-# oled.text("test", 1, 1)
-# oled.show()
-# sleep(1)
+
+
+def load_baby(oled):
+    baby = Icon('baby.pbm', width=48, height=48, name="Baby")
+    oled.blit(baby.image, 40, 16)
+    oled.show()
 
 def build_toolbar():
-
     toolbar = Toolbar()
-    toolbar.spacer = 1
+    toolbar.spacer = 2
     
     food = Icon('food.pbm', width=16, height=16, name="food")
     toolbar.additem(food)
@@ -32,29 +33,25 @@ def build_toolbar():
     game = Icon('game.pbm', width=16, height=16, name="game")
     toolbar.additem(game)
 
-    oled.blit(toolbar.data, 0,0)
-    
-    # game = Icon('game.pbm', width=16, height=16)
-    # game.x = spacer + (16 * 2) + spacer
-    # firstaid = Icon('firstaid.pbm', width=16, height=16)
-    # firstaid.x = spacer + (16 * 3) + spacer
-    # toilet = Icon('toilet.pbm', width=16, height=16)
-    # toilet.x = (16 * 4) + spacer
-    # heart = Icon('heart.pbm', width=16, height=16)
-    # heart.x = (16 * 5) + spacer
+    firstaid = Icon('firstaid.pbm', width=16, height=16, name="firstaid")
+    toolbar.additem(firstaid)
+
+    toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
+    toolbar.additem(toilet)
+
+    heart = Icon('heart.pbm', width=16, height=16, name="heart")
+    toolbar.additem(heart)
+
+    call = Icon('call.pbm', width=16, height=16, name="call")
+    toolbar.additem(call)
+
     # book = Icon('book.pbm', width=16, height=16)
-    # book.x = (16 * 6) + spacer
-    # call = Icon('call.pbm', width=16, height=16)
-    # call.x = (16 * 7) + spacer
+    # toolbar.additem(book)
 
-    # oled.blit(food.image, food.x, food.y) # 48 is the lower row
-    # oled.blit(lightbulb.image, lightbulb.x, lightbulb.y)
-    # oled.blit(toilet.image, toilet.x, toilet.y)
-    # oled.blit(heart.image, heart.x, heart.y)
-    # oled.blit(book.image, book.x, book.y)
-    # oled.blit(call.image, call.x, call.y)
-    # oled.blit(firstaid.image, firstaid.x, firstaid.y)
-    # oled.blit(game.image, game.x, game.y)
+    return toolbar
 
-build_toolbar()
+tb = build_toolbar()
+tb.show(oled)
+tb.select(0, oled)
+load_baby(oled)
 oled.show()

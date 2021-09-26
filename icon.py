@@ -75,15 +75,16 @@ class Icon():
 
     @property
     def invert(self)->bool:
-        image = self.__image
-        for item in image:
-            item = item & 'x\FF'
-        self.__image = image
         return self.__invert
 
     @invert.setter
     def invert(self, value):
-        self.__invert - value
+        if value:
+            image = self.__image
+            for item in image:
+                item = item & 'x\FF'
+        self.__image = image
+        self.__invert = value
 
     @staticmethod
     def loadicons(file):
@@ -97,12 +98,12 @@ class Icon():
 
 class Toolbar():
     __icon_array = []
-    __framebuf = framebuf.FrameBuffer(bytearray(20*64), 16, 16, framebuf.MONO_HLSB)
+    __framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
     __spacer = 1
 
     def __init__(self):
         print("building toolbar")
-        self.__framebuf = framebuf.FrameBuffer(bytearray(20*64), 16, 16, framebuf.MONO_HLSB)
+        self.__framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
 
     def additem(self, icon:Icon):
         self.__icon_array.append(icon)
@@ -111,15 +112,14 @@ class Toolbar():
     def data(self):
         """ Returns the toolbar array as a buffer"""
         x = 0
-        count = 1
+        count = 0
         for icon in self.__icon_array:
-            self.__framebuf.blit(icon.image, x, 0, framebuf.MONO_HLSB) 
-            # x += self.__spacer + (icon.width * count) + self.__spacer
-            x = icon.width * count
             print("x:",x)
             count += 1
-            print("icon", icon.name)
-        return self.__framebuf 
+            self.__framebuf.blit(icon.image, x, 0) 
+            fb = self.__framebuf
+            x += icon.width + self.spacer
+        return fb
 
     @property
     def spacer(self):
@@ -130,3 +130,12 @@ class Toolbar():
     def spacer(self, value):
         """ Sets the spacer value"""
         self.__spacer = value
+
+    def show(self, oled):
+        oled.blit(self.data, 0,0)
+        oled.show()
+    
+    def select(self, index, oled):
+        """ Set the item in the index to inverted """
+        self.__icon_array[index].invert = True
+        self.show(oled)
