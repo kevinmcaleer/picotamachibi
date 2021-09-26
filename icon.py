@@ -10,7 +10,7 @@ class Icon():
     __height = 16
     __name = "Empty"
 
-    def __init__(self, filename:None, width=None, height=None, name=None):
+    def __init__(self, filename:None, width=None, height=None, x=None, y=None, name=None):
         if filename is not None:
             self.__image = self.loadicons(filename)
         if width:
@@ -19,6 +19,10 @@ class Icon():
             self.__height = height
         if name:
             self.__name = name
+        if x:
+            self.__x = x
+        if y:
+            self.__y = y
 
     @property
     def image(self):
@@ -75,16 +79,26 @@ class Icon():
 
     @property
     def invert(self)->bool:
+        print("Invert is", self.__invert)
         return self.__invert
 
     @invert.setter
-    def invert(self, value):
-        if value:
-            image = self.__image
-            for item in image:
-                item = item & 'x\FF'
+    def invert(self, value:bool):
+        """ Inverts the icon colour """
+        
+        image = self.__image
+        for x in range(0,self.width):
+            for y in range(0, self.height):
+                pxl = image.pixel(x,y)
+                if pxl == 0:
+                    image.pixel(x,y,1)
+                else:
+                    image.pixel(x,y,0)
+                # image.pixel(x,y,~image.pixel(x,y))
+            
         self.__image = image
         self.__invert = value
+        print("Invert is", self.__invert)
 
     @staticmethod
     def loadicons(file):
@@ -114,7 +128,7 @@ class Toolbar():
         x = 0
         count = 0
         for icon in self.__icon_array:
-            print("x:",x)
+            # print("x:",x)
             count += 1
             self.__framebuf.blit(icon.image, x, 0) 
             fb = self.__framebuf
@@ -137,5 +151,11 @@ class Toolbar():
     
     def select(self, index, oled):
         """ Set the item in the index to inverted """
+        # for item in self.__icon_array:
+        #     item.invert = False
         self.__icon_array[index].invert = True
+        self.show(oled)
+
+    def unselect(self, index, oled):
+        self.__icon_array[index].invert = False
         self.show(oled)

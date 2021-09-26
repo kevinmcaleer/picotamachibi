@@ -17,8 +17,9 @@ oled.init_display()
 
 def load_baby(oled):
     baby = Icon('baby.pbm', width=48, height=48, name="Baby")
-    oled.blit(baby.image, 40, 16)
+    oled.blit(baby.image, 10, 16)
     oled.show()
+    return oled
 
 def build_toolbar():
     toolbar = Toolbar()
@@ -52,6 +53,30 @@ def build_toolbar():
 
 tb = build_toolbar()
 tb.show(oled)
-tb.select(0, oled)
-load_baby(oled)
+# tb.select(, oled)
+# tb.show(oled)
+oled = load_baby(oled)
 oled.show()
+
+index = 0
+tb.select(index, oled)
+cancel = False
+while True:
+    key = input("v & b to move selection")
+    tb.unselect(index, oled)
+    if key == "v":
+        index -= 1
+        cancel = False
+    if key == "b":
+        index += 1
+        cancel = False
+    if key == "m":
+        tb.unselect(index, oled)
+        cancel = True
+    if index <0:
+        index = 6
+    if index == 7:
+        index = 0
+    if not cancel:
+        tb.select(index, oled)
+    tb.show(oled)
