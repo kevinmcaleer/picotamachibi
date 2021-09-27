@@ -1,5 +1,6 @@
 import framebuf
 from machine import Pin
+from time import sleep
 
 class Icon():
     
@@ -196,7 +197,6 @@ class Animate():
     @property
     def done(self):
         """ Has the animation completed """
-        print("Done?",self.__done)
         if self.__done:
             self.__done = False
             return True
@@ -225,3 +225,99 @@ class Button():
                 return True
             else:
                 return False
+
+class Event():
+    __name = ""
+    __value = 0
+    __sprite = None
+    __timer = -1 # -1 means no timer set
+    __timer_ms = 0
+    __callback = None
+    __message = ""
+
+    def __init__(self, name=None, sprite=None, value=None, callback=None):
+        """ Create a new event """
+        if name:
+            self.__name = name
+        if sprite:
+            self.__sprite = sprite
+        if value:
+            self.__value = value
+        if callback is not None:
+            self.__callback = callback
+    
+    @property
+    def name(self):
+        """ Return the name of the event"""
+        return self.__name
+
+    @name.setter
+    def name(self, value):
+        """ Set the name of the Event"""
+        self.__name = value
+
+    @property
+    def value(self):
+        return self.__value
+
+    @value.setter
+    def value(self, value):
+        self.__value = value
+
+    @property
+    def sprite(self):
+        return self.__sprite
+
+    @sprite.setter
+    def sprite(self, value):
+        self.__value = value
+
+    @property
+    def message(self):
+        """ Return the message """
+        return self.__message
+    
+    @message.setter
+    def message(self, value):
+        """ Set the message """
+        self.__message = value
+
+    def popup(self, oled):
+        # display popup window
+        # show sprite
+        # show message
+
+        fbuf = framebuf.FrameBuffer(bytearray(128 * 48 * 1), 128, 48, framebuf.MONO_HLSB)
+        fbuf.rect(0,0,128,48, 1)
+        fbuf.blit(self.sprite.image, 5, 10)
+        fbuf.text(self.message, 32, 18)
+        oled.blit(fbuf, 0, 16)
+        oled.show()
+        sleep(2)
+    
+    @property
+    def timer(self):
+        return self.__timer
+
+    @timer.setter
+    def timer(self, value):
+        self.__timer = value
+
+    @property
+    def timer_ms(self):
+        return self.__timer_ms
+
+    @timer_ms.setter
+    def timer_ms(self, value):
+        self.__timer_ms = value
+
+    def tick(self):
+        self.__timer_ms += 1
+        if self.__timer_ms >= self.__timer:
+            if self.__callback is not None:
+                print("poop check callback")
+                self.__callback
+                self.__timer = -1
+                self.__timer_ms = 0
+            else:
+                print("Timer Alert!")

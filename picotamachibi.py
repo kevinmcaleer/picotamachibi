@@ -1,7 +1,7 @@
 # from icons import food_icon
 from machine import I2C, Pin
 from ssd1306 import SSD1306_I2C
-from icon import Animate, Icon, Toolbar, Button
+from icon import Animate, Icon, Toolbar, Button, Event
 from time import sleep
 import framebuf
 
@@ -17,6 +17,16 @@ oled.init_display()
 health = 1
 happiness = 1
 sleepiness = 1
+
+# load icons
+food = Icon('food.pbm', width=16, height=16, name="food")
+lightbulb = Icon('lightbulb.pbm', width=16, height=16, name="lightbulb")
+game = Icon('game.pbm', width=16, height=16, name="game")
+firstaid = Icon('firstaid.pbm', width=16, height=16, name="firstaid")
+toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
+heart = Icon('heart.pbm', width=16, height=16, name="heart")
+call = Icon('call.pbm', width=16, height=16, name="call")
+book = Icon('book.pbm', width=16, height=16)
 
 def load_baby():
     baby = Icon('baby.pbm', width=48, height=48, name="Baby")
@@ -61,6 +71,10 @@ def load_eat():
 
     return eat_animation
 
+def clear():
+    """ Clear the screen """
+    oled.fill_rect(0,0,128,64,0)
+
 def animate(frames, timer):
     for frame in frames:
         oled.blit(frame.image, frame.x, frame.y)
@@ -71,40 +85,33 @@ def build_toolbar():
     toolbar = Toolbar()
     toolbar.spacer = 2
     
-    food = Icon('food.pbm', width=16, height=16, name="food")
-    toolbar.additem(food)
-
-    lightbulb = Icon('lightbulb.pbm', width=16, height=16, name="lightbulb")
+    toolbar.additem(food)    
     toolbar.additem(lightbulb)
-
-    game = Icon('game.pbm', width=16, height=16, name="game")
     toolbar.additem(game)
-
-    firstaid = Icon('firstaid.pbm', width=16, height=16, name="firstaid")
     toolbar.additem(firstaid)
-
-    toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
     toolbar.additem(toilet)
-
-    heart = Icon('heart.pbm', width=16, height=16, name="heart")
     toolbar.additem(heart)
-
-    call = Icon('call.pbm', width=16, height=16, name="call")
     toolbar.additem(call)
 
-    # book = Icon('book.pbm', width=16, height=16)
+    # 
     # toolbar.additem(book)
 
     return toolbar
 
+def poop_check():
+    global poop
+    poop = True
+    print("poop check")
+
 tb = build_toolbar()
 # baby = load_baby()
 bounce = load_baby_bounce()
-poop = load_poop()
+poop_sprite = load_poop()
 eat_food = load_eat()
-poopy = Animate(frames=poop)
+poopy = Animate(frames=poop_sprite)
 baby = Animate(frames=bounce)
 eat = Animate(frames=eat_food)
+poop = False
 
 button_a = Button(4)
 button_b = Button(3)
@@ -114,17 +121,20 @@ index = 0
 tb.select(index, oled)
 cancel = False
 feeding_time = False
+
+# Set up Events
+energy_increase = Event(name="Increase Energy", sprite=heart, value=1)
+firstaid = Event(name="First Aid", sprite=firstaid, value=0)
+toilet = Event(name="Toilet", sprite=toilet, value=0)
+poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
+poop_event.timer = 3000
+poop_event.timer_ms = 1
+
 while True:
     # key = input("v & b to move selection")
     key = ' '
     if not cancel:
         tb.unselect(index, oled)
-    # if key == "v":
-    #     index -= 1
-    #     if index <0:
-    #         index = 6
-        
-        # cancel = False
     if button_a.is_pressed:
         index += 1
         if index == 7:
@@ -140,31 +150,47 @@ while True:
 
     if button_b.is_pressed:
         if tb.selected_item == "food":
-            print("food")
             feeding_time = True
         if tb.selected_item == "game":
             print("game")
         if tb.selected_item == "toilet":
-            print("toilet")
+            toilet.message = "Cleaning..."
+            toilet.popup(oled=oled)
+            poop = False
+            clear()
         if tb.selected_item == "lightbulb":
             print("lightbulb")
         if tb.selected_item == "firstaid":
-            print("firstaid")
+            firstaid.message = "Vitamins"
+            firstaid.popup(oled=oled)
+            clear()
         if tb.selected_item == "heart":
             print("heart")
         if tb.selected_item == "call":
             print("call")
 
-    if feeding_time and (not eat.done):
-        eat.animate(oled)
-        # sleep(1)
-    elif feeding_time and eat.done:
-        feeding_time = False
+    # Time for Poop?
+    # poop_check()
+    poop_event.tick()
+
+    if feeding_time:
+        if not eat.done:
+            eat.animate(oled)
+        if feeding_time and eat.done:
+            feeding_time = False
+            energy_increase.message = "ENERGY + 1"
+            energy_increase.popup(oled=oled)
+            # oled.blit(energy_increase.sprite.image, energy_increase.sprite.x, energy_increase.sprite.y)
+            # oled.show()
+            
+            clear()
     else:
         baby.animate(oled)
+    
+    if poop:
+        poopy.animate(oled)
     tb.show(oled)    
-    poopy.animate(oled)
-    # oled.blit(baby.image, 0, 16)
+    # poopy.animate(oled)
     oled.show()
     sleep(0.05)
     
