@@ -1,4 +1,5 @@
 import framebuf
+from machine import Pin
 
 class Icon():
     
@@ -11,8 +12,6 @@ class Icon():
     __name = "Empty"
 
     def __init__(self, filename:None, width=None, height=None, x=None, y=None, name=None):
-        if filename is not None:
-            self.__image = self.loadicons(filename)
         if width:
             self.__width = width
         if height:
@@ -23,6 +22,8 @@ class Icon():
             self.__x = x
         if y:
             self.__y = y
+        if filename is not None:
+            self.__image = self.loadicons(filename)
 
     @property
     def image(self):
@@ -97,25 +98,27 @@ class Icon():
                 
         self.__image = image
         self.__invert = value
-        print("Invert is", self.__invert)
+        # print("Invert is", self.__invert)
 
-    @staticmethod
-    def loadicons(file):
+    def loadicons(self, file):
         with open(file, 'rb') as f:
             f.readline() # magic number
             f.readline() # creator comment
             f.readline() # dimensions
             data = bytearray(f.read())
-        fbuf = framebuf.FrameBuffer(data, 16,16, framebuf.MONO_HLSB)
+        fbuf = framebuf.FrameBuffer(data, self.__width,self.__height, framebuf.MONO_HLSB)
+        # print(self.__name, self.__width, self.__height)
         return fbuf
 
 class Toolbar():
     __icon_array = []
-    __framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
+    __framebuf = framebuf.FrameBuffer(bytearray(160*64*1), 160, 16, framebuf.MONO_HLSB)
     __spacer = 1
+    __selected_item = None
+    __selected_index = -1 # -1 means no item selected
 
     def __init__(self):
-        print("building toolbar")
+        # print("building toolbar")
         self.__framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
 
     def additem(self, icon:Icon):
@@ -146,15 +149,79 @@ class Toolbar():
 
     def show(self, oled):
         oled.blit(self.data, 0,0)
-        oled.show()
+        # oled.show()
     
     def select(self, index, oled):
         """ Set the item in the index to inverted """
         # for item in self.__icon_array:
         #     item.invert = False
         self.__icon_array[index].invert = True
+        self.__selected_index = index
         self.show(oled)
 
     def unselect(self, index, oled):
         self.__icon_array[index].invert = False
+        self.__selected_index = -1
         self.show(oled)
+
+    @property
+    def selected_item(self):
+        """ Returns the name of the currently selected icon """
+        self.__selected_item = self.__icon_array[self.__selected_index].name
+        return self.__selected_item
+
+class Animate():
+    __frames = []
+    __current_frame = 0
+    # __speed = 0.1
+    __done = False # Has the animation completed
+
+    def __init__(self, frames):
+       """ setup the animation""" 
+       self.__current_frame = 0
+       self.__frames = frames
+       self.__done = False
+
+    def animate(self, oled):
+        cf = self.__current_frame # Current Frame number - used to index the frames array
+        frame = self.__frames[cf]
+
+        oled.blit(frame.image, frame.x, frame.y)
+        self.__current_frame +=1
+        if self.__current_frame > len(self.__frames)-1:
+            self.__current_frame = 0
+            self.__done = True
+        # print("frame", self.__current_frame)
+    
+    @property
+    def done(self):
+        """ Has the animation completed """
+        print("Done?",self.__done)
+        if self.__done:
+            self.__done = False
+            return True
+        else:
+            return False
+
+class Button():
+    __pressed = False
+    __pin = 0
+    __button_down = False
+
+    def __init__(self, pin:int):
+        self.__pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
+        self.__pressed = False
+
+    @property
+    def is_pressed(self)->bool:
+        """ Returns the current state of the button """
+        if self.__pin.value() == 0:
+            self.__button_down = False
+            return False
+        if self.__pin.value() == 1:
+            if not self.__button_down:
+                # print("button pressed")
+                self.__button_down = True
+                return True
+            else:
+                return False
