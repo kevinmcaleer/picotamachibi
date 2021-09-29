@@ -102,6 +102,7 @@ class Icon():
         # print("Invert is", self.__invert)
 
     def loadicons(self, file):
+        print(file)
         with open(file, 'rb') as f:
             f.readline() # magic number
             f.readline() # creator comment

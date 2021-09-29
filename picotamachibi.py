@@ -127,7 +127,7 @@ energy_increase = Event(name="Increase Energy", sprite=heart, value=1)
 firstaid = Event(name="First Aid", sprite=firstaid, value=0)
 toilet = Event(name="Toilet", sprite=toilet, value=0)
 poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
-poop_event.timer = 3000
+poop_event.timer = 3
 poop_event.timer_ms = 1
 
 while True:
