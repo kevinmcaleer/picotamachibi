@@ -118,7 +118,7 @@ class Toolbar():
     __spacer = 1
     __selected_item = None
     __selected_index = -1 # -1 means no item selected
-
+  
     def __init__(self):
         # print("building toolbar")
         self.__framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
@@ -177,12 +177,16 @@ class Animate():
     __current_frame = 0
     # __speed = 0.1
     __done = False # Has the animation completed
+    __loop_count = 0
+    __loop = False
+    __bounce = False
 
     def __init__(self, frames):
        """ setup the animation""" 
        self.__current_frame = 0
        self.__frames = frames
        self.__done = False
+       self.__loop_count = 1
 
     def animate(self, oled):
         cf = self.__current_frame # Current Frame number - used to index the frames array
@@ -190,10 +194,26 @@ class Animate():
 
         oled.blit(frame.image, frame.x, frame.y)
         self.__current_frame +=1
+        if self.__bouncing:
+            self.__current_frame -=1
+            if self.__current_frame == 0:
+                self.__bouncing = False
         if self.__current_frame > len(self.__frames)-1:
-            self.__current_frame = 0
-            self.__done = True
+            if self.__bounce:
+                self.__bouncing = True
+                self.__current_frame -=1
+            else:
+                self.__current_frame = 0
+            if self.__loop_count > 0:
+                self.__loop_count -= 1
+            if self.__loop_count == 0:
+                self.__done = True
+                if self.__loop: self.__loop = False
+                if self.__bounce: self.__bounce = False
+        
         # print("frame", self.__current_frame)
+    
+
     
     @property
     def done(self):
@@ -203,6 +223,24 @@ class Animate():
             return True
         else:
             return False
+
+    def loop(self, oled, no=None):
+        """ Loops the animation
+        
+        if no is None or -1 the animation will continue looping until animate.stop() is called """
+        self.__loop_count = no
+        self.__loop = True
+
+    def stop(self):
+        self.__loop_count = 0
+        self.__loop = False
+        self.__bounce = False
+        self.__done = True
+
+    def bounce(self, oled, no=None):
+        """ Loops the animation forwared, then backward, the number of time specified in no """
+        self.__bounce = True
+        self.__loop_count = no
 
 class Button():
     __pressed = False
