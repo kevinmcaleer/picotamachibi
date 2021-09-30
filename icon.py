@@ -194,6 +194,8 @@ class Animate():
 
         oled.blit(frame.image, frame.x, frame.y)
         self.__current_frame +=1
+        
+        #change to forward and reverse
         if self.__bouncing:
             self.__current_frame -=1
             if self.__current_frame == 0:
