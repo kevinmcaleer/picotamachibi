@@ -54,8 +54,8 @@ def load_poop():
     poop_animation.append(Icon('poop02.pbm', width=16, height=16, x=x, y=y, name="poop02"))
     poop_animation.append(Icon('poop03.pbm', width=16, height=16, x=x, y=y, name="poop03"))
     poop_animation.append(Icon('poop04.pbm', width=16, height=16, x=x, y=y, name="poop04"))
-    poop_animation.append(Icon('poop03.pbm', width=16, height=16, x=x, y=y, name="poop05"))
-    poop_animation.append(Icon('poop02.pbm', width=16, height=16, x=x, y=y, name="poop06"))
+    # poop_animation.append(Icon('poop03.pbm', width=16, height=16, x=x, y=y, name="poop05"))
+    # poop_animation.append(Icon('poop02.pbm', width=16, height=16, x=x, y=y, name="poop06"))
     return poop_animation
 
 def load_eat():
@@ -71,6 +71,19 @@ def load_eat():
     eat_animation.append(Icon('eat07.pbm', width=48, height=48, x=x, y=y, name="eat07"))
 
     return eat_animation
+
+def load_sleep():
+    sleep_animation = []
+    x = 48
+    y = 16
+    w = 48
+    h = 48
+    sleep_animation.append(Icon('baby_zzz01.pbm', width=w, height=h, x=x, y=y, name="baby_zzz01"))
+    sleep_animation.append(Icon('baby_zzz02.pbm', width=w, height=h, x=x, y=y, name="baby_zzz02"))
+    sleep_animation.append(Icon('baby_zzz03.pbm', width=w, height=h, x=x, y=y, name="baby_zzz03"))
+    sleep_animation.append(Icon('baby_zzz04.pbm', width=w, height=h, x=x, y=y, name="baby_zzz04"))
+    # sleep_animation.append(Icon('baby_zzz05.pbm', width=w, height=h, x=x, y=y, name="baby_zzz05"))
+    return sleep_animation
 
 def clear():
     """ Clear the screen """
@@ -109,9 +122,11 @@ tb = build_toolbar()
 bounce = load_baby_bounce()
 poop_sprite = load_poop()
 eat_food = load_eat()
+sleepy_baby = load_sleep()
 poopy = Animate(frames=poop_sprite, animation_type="default")
 baby = Animate(frames=bounce, animation_type="default")
 eat = Animate(frames=eat_food, animation_type="default")
+babyzzz = Animate(frames=sleepy_baby, animation_type="loop")
 poop = False
 
 button_a = Button(4)
@@ -132,6 +147,8 @@ poop_event.timer = 3
 poop_event.timer_ms = 1
 
 baby.bounce()
+poopy.bounce()
+babyzzz.speed = 'very slow'
 
 while True:
     # key = input("v & b to move selection")
@@ -188,7 +205,8 @@ while True:
             
             clear()
     else:
-        baby.animate(oled)
+        # baby.animate(oled)
+        babyzzz.animate(oled)
     if poop:
         poopy.animate(oled)
     tb.show(oled)    
