@@ -1,6 +1,8 @@
 import framebuf
 from machine import Pin
 from time import sleep
+from os import listdir
+import gc
 
 class Icon():
     
@@ -182,11 +184,30 @@ class Animate():
     __bouncing = False
     __animation_type = "default"
     __pause = 0
+    __set = False
+    __x = 0
+    __y = 0
+    __width = 16
+    __height = 16
+    __cached = False
+    __filename = None
     """ other animations types: 
         - loop
         - bounce
         - reverse
     """
+    @property
+    def set(self)->bool:
+        return self.__set
+
+    @set.setter
+    def set(self, value:bool):
+        self.__set = value
+        if value == True:
+            self.load()
+        else:
+            self.unload()
+            
 
     @property
     def speed(self):
@@ -220,14 +241,36 @@ class Animate():
         else:
             print(value," is not a valid Animation type - it should be 'loop','bounce','reverse' or 'default'")
 
-    def __init__(self, frames, animation_type:str=None):
+    def __init__(self, frames=None, animation_type:str=None,x:int=None,y:int=None, width:int=None, height:int=None, filename=None):
        """ setup the animation """ 
+
+       if x:
+           self.__x = x
+       if y:
+           self.__y = y
+       if width:
+           self.__width = width
+       if height:
+           self.__height = height  
        self.__current_frame = 0
-       self.__frames = frames
+       if frames is not None:
+        self.__frames = frames
        self.__done = False
        self.__loop_count = 1
        if animation_type is not None:
             self.animation_type = animation_type
+       if filename:
+           self.__filename = filename 
+
+    @property
+    def filename(self):
+        """ Returns the current filename"""
+        return self.__filename
+
+    @filename.setter
+    def filename(self, value):
+        """ Sets the filename """
+        self.__filename = value
 
     def forward(self):
         """ progress the current frame """
@@ -261,6 +304,25 @@ class Animate():
             else:
                 self.__current_frame -=1
     
+    def load(self):
+        """ load the animation files """
+
+        # load the files from disk
+        if not self.__cached:
+            files = listdir()
+            array = []
+            for file in files:
+                if (file.startswith(self.__filename)) and (file.endswith('.pbm')):
+                    array.append(Icon(filename=file, width=self.__width, height=self.__height, x=self.__x, y=self.__y, name=file))
+            self.__frames = array
+            self.__cached = True
+
+    def unload(self):
+        """ free up memory """
+        self.__frames = None
+        self.__cached = False
+        gc.collect()
+
     def animate(self, oled):
         """ Animates the frames based on the animation type and for the number of times specified """
         cf = self.__current_frame # Current Frame number - used to index the frames array

@@ -26,11 +26,6 @@ firstaid = Icon('firstaid.pbm', width=16, height=16, name="firstaid")
 toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
 heart = Icon('heart.pbm', width=16, height=16, name="heart")
 call = Icon('call.pbm', width=16, height=16, name="call")
-# book = Icon('book.pbm', width=16, height=16)
-
-# def load_baby():
-#     baby = Icon('baby.pbm', width=48, height=48, name="Baby")
-#     return baby
 
 def load_baby_bounce():
     bounce_animation = []
@@ -40,10 +35,6 @@ def load_baby_bounce():
     bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, x=x, y=y, name='frame01'))
     bounce_animation.append(Icon('baby_bounce02.pbm', width=48, height=48, x=x, y=y, name='frame02'))
     bounce_animation.append(Icon('baby_bounce03.pbm', width=48, height=48, x=x, y=y, name='frame03'))
-    # bounce_animation.append(Icon('baby_bounce02.pbm', width=48, height=48, x=x, y=y, name='frame04'))
-    # bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, x=x, y=y, name='frame05'))
-    # bounce_animation.append(Icon('baby_bounce04.pbm', width=48, height=48, x=x, y=y, name='frame06'))
-    # bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, name='frame07'))
     return bounce_animation
 
 def load_poop():
@@ -54,8 +45,6 @@ def load_poop():
     poop_animation.append(Icon('poop02.pbm', width=16, height=16, x=x, y=y, name="poop02"))
     poop_animation.append(Icon('poop03.pbm', width=16, height=16, x=x, y=y, name="poop03"))
     poop_animation.append(Icon('poop04.pbm', width=16, height=16, x=x, y=y, name="poop04"))
-    # poop_animation.append(Icon('poop03.pbm', width=16, height=16, x=x, y=y, name="poop05"))
-    # poop_animation.append(Icon('poop02.pbm', width=16, height=16, x=x, y=y, name="poop06"))
     return poop_animation
 
 def load_eat():
@@ -85,6 +74,42 @@ def load_sleep():
     # sleep_animation.append(Icon('baby_zzz05.pbm', width=w, height=h, x=x, y=y, name="baby_zzz05"))
     return sleep_animation
 
+def load_skull():
+    skull_animation = []
+    x = 40
+    y = 16
+    w = 16
+    h = 16
+    # skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull01"))
+    # skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull02"))
+    # skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull03"))
+    # skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull04"))
+    skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull05"))
+    skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull06"))
+    skull_animation.append(Icon('skull02.pbm', width=w, height=h, x=x, y=y, name="skull01"))
+    skull_animation.append(Icon('skull01.pbm', width=w, height=h, x=x, y=y, name="skull01"))
+    return skull_animation
+
+def load_go_potty():
+    potty_animation = []
+    x = 64
+    y = 16
+    potty_animation.append(Icon('potty01.pbm', width=48, height=48, x=x, y=y, name="potty01"))
+    potty_animation.append(Icon('potty02.pbm', width=48, height=48, x=x, y=y, name="potty02"))
+    potty_animation.append(Icon('potty03.pbm', width=48, height=48, x=x, y=y, name="potty03"))
+    potty_animation.append(Icon('potty04.pbm', width=48, height=48, x=x, y=y, name="potty04"))
+    potty_animation.append(Icon('potty05.pbm', width=48, height=48, x=x, y=y, name="potty05"))
+    potty_animation.append(Icon('potty06.pbm', width=48, height=48, x=x, y=y, name="potty06"))
+    potty_animation.append(Icon('potty07.pbm', width=48, height=48, x=x, y=y, name="potty07"))
+    potty_animation.append(Icon('potty08.pbm', width=48, height=48, x=x, y=y, name="potty08"))
+    potty_animation.append(Icon('potty09.pbm', width=48, height=48, x=x, y=y, name="potty09"))
+    potty_animation.append(Icon('potty10.pbm', width=48, height=48, x=x, y=y, name="potty10"))
+    potty_animation.append(Icon('potty11.pbm', width=48, height=48, x=x, y=y, name="potty11"))
+    potty_animation.append(Icon('potty12.pbm', width=48, height=48, x=x, y=y, name="potty12"))
+    potty_animation.append(Icon('potty13.pbm', width=48, height=48, x=x, y=y, name="potty13"))
+    potty_animation.append(Icon('potty14.pbm', width=48, height=48, x=x, y=y, name="potty14"))
+    return potty_animation
+
 def clear():
     """ Clear the screen """
     oled.fill_rect(0,0,128,64,0)
@@ -98,7 +123,6 @@ def animate(frames, timer):
 def build_toolbar():
     toolbar = Toolbar()
     toolbar.spacer = 2
-    
     toolbar.additem(food)    
     toolbar.additem(lightbulb)
     toolbar.additem(game)
@@ -106,28 +130,21 @@ def build_toolbar():
     toolbar.additem(toilet)
     toolbar.additem(heart)
     toolbar.additem(call)
-
-    # 
-    # toolbar.additem(book)
-
     return toolbar
 
-def poop_check():
-    global poop
-    poop = True
-    print("poop check")
-
 tb = build_toolbar()
-# baby = load_baby()
-bounce = load_baby_bounce()
-poop_sprite = load_poop()
-eat_food = load_eat()
-sleepy_baby = load_sleep()
-poopy = Animate(frames=poop_sprite, animation_type="default")
-baby = Animate(frames=bounce, animation_type="default")
-eat = Animate(frames=eat_food, animation_type="default")
-babyzzz = Animate(frames=sleepy_baby, animation_type="loop")
-poop = False
+# bounce = load_baby_bounce()
+# poop_sprite = load_poop()
+# eat_food = load_eat()
+# sleepy_baby = load_sleep()
+# skull = load_skull()
+# potty = load_go_potty()
+poopy = Animate(x=96,y=48, width=16, height=16, filename='poop')
+baby = Animate(x=48,y=16, width=48, height=48, filename='baby_bounce', animation_type='bounce')
+eat = Animate(x=48,y=16, width=48, height=48, filename='eat')
+babyzzz = Animate(animation_type="loop", x=48,y=16, width=48, height=48, filename='baby_zzz')
+death = Animate(animation_type='bounce', x=40,y=16, width=16, height=16, filename="skull")
+go_potty = Animate(filename="potty", animation_type='bounce',x=64,y=16, width=48, height=48)
 
 button_a = Button(4)
 button_b = Button(3)
@@ -138,19 +155,26 @@ tb.select(index, oled)
 cancel = False
 feeding_time = False
 sleeping = False
+death.set = True
 
 # Set up Events
 energy_increase = Event(name="Increase Energy", sprite=heart, value=1)
 firstaid = Event(name="First Aid", sprite=firstaid, value=0)
 toilet = Event(name="Toilet", sprite=toilet, value=0)
-poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
+# poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
 sleep_time = Event(name="sleep time", sprite=lightbulb, value=1)
-poop_event.timer = 3
-poop_event.timer_ms = 1
+# poop_event.timer = 3
+# poop_event.timer_ms = 1
 
 baby.bounce()
 poopy.bounce()
+death.loop(no=-1)
+death.speed='slow'
 babyzzz.speed = 'very slow'
+go_potty.loop(no=1)
+go_potty.set = True
+poopy.set = False
+go_potty.load()
 
 while True:
     # key = input("v & b to move selection")
@@ -174,23 +198,28 @@ while True:
         if tb.selected_item == "food":
             feeding_time = True
             sleeping = False
+            baby.unload()
             
         if tb.selected_item == "game":
             print("game")
         if tb.selected_item == "toilet":
             toilet.message = "Cleaning..."
             toilet.popup(oled=oled)
-            poop = False
+            poopy.set = False
+            baby.set = True
             clear()
+            poopy.unload()
         if tb.selected_item == "lightbulb":
             if not sleeping:
                 sleeping = True
+                babyzzz.load()
                 sleep_time.message = "Night Night"
                 sleep_time.popup(oled)
                 clear()
                 # need to add an event that increases energy level after sleeping for 1 minute
             else:
                 sleeping = False
+                babyzzz.unload()
             print("lightbulb")
         if tb.selected_item == "firstaid":
             firstaid.message = "Vitamins"
@@ -204,28 +233,43 @@ while True:
 
     # Time for Poop?
     # poop_check()
-    poop_event.tick()
+    # poop_event.tick()
 
     if feeding_time:
+        eat.load()
         if not eat.done:
             eat.animate(oled)
         if feeding_time and eat.done:
             feeding_time = False
             energy_increase.message = "ENERGY + 1"
             energy_increase.popup(oled=oled)
-            # oled.blit(energy_increase.sprite.image, energy_increase.sprite.x, energy_increase.sprite.y)
-            # oled.show()
             
             clear()
+            eat.unload()
+            baby.load()
     else:
         if sleeping:
             babyzzz.animate(oled)
         else:
-            baby.animate(oled)
-    if poop:
+            if baby.set:
+                baby.load()
+                baby.animate(oled)
+            if go_potty.set:
+                go_potty.animate(oled)
+            if go_potty.done:
+                print("potty done")
+                go_potty.set = False
+                poopy.set = True
+                baby.load()
+                baby.bounce(no=-1)
+                baby.set = True
+
+    if poopy.set:
+        poopy.load()
         poopy.animate(oled)
+    if death.set:
+        death.animate(oled)
     tb.show(oled)    
-    # poopy.animate(oled)
     oled.show()
     sleep(0.05)
     
