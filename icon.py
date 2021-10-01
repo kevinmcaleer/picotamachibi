@@ -104,7 +104,7 @@ class Icon():
         # print("Invert is", self.__invert)
 
     def loadicons(self, file):
-        print(file)
+        # print(file)
         with open(file, 'rb') as f:
             f.readline() # magic number
             f.readline() # creator comment
@@ -125,8 +125,11 @@ class Toolbar():
         # print("building toolbar")
         self.__framebuf = framebuf.FrameBuffer(bytearray(160*64*8), 160, 16, framebuf.MONO_HLSB)
 
-    def additem(self, icon:Icon):
+    def additem(self, icon):
         self.__icon_array.append(icon)
+
+    def remove(self, icon):
+        self.__icon_array.remove(icon)
 
     @property
     def data(self):
@@ -136,7 +139,10 @@ class Toolbar():
         for icon in self.__icon_array:
             # print("x:",x)
             count += 1
-            self.__framebuf.blit(icon.image, x, 0) 
+            if type(icon) == Icon:
+                self.__framebuf.blit(icon.image, x, 0) 
+            if type(icon) == Animate:
+                self.__framebuf.blit(icon.__frames[icon.__current_frame].image, x, 0)
             fb = self.__framebuf
             x += icon.width + self.spacer
         return fb
@@ -420,7 +426,21 @@ class Animate():
         else:
             self.__loop_count = -1
 
+    @property
+    def width(self):
+        return self.__width
     
+    @width.setter
+    def width(self, value):
+        self.__width = value
+    
+    @property
+    def height(self):
+        return self.__width
+    
+    @height.setter
+    def height(self, value):
+        self.__height = value
 
 
 class Button():
