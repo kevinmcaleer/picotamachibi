@@ -178,44 +178,105 @@ class Animate():
     # __speed = 0.1
     __done = False # Has the animation completed
     __loop_count = 0
-    __loop = False
-    __bounce = False
+    __bouncing = False
+    __animation_type = "default"
+    """ other animations types: 
+        - loop
+        - bounce
+        - reverse
+    """
 
-    def __init__(self, frames):
-       """ setup the animation""" 
+    @property
+    def animation_type(self):
+        return self.__animation_type
+
+    @animation_type.setter
+    def animation_type(self, value):
+        if value in ['default','loop','bounce','reverse']:
+            self.__animation_type = value
+        else:
+            print(value," is not a valid Animation type - it should be 'loop','bounce','reverse' or 'default'")
+
+    def __init__(self, frames, animation_type:str=None):
+       """ setup the animation """ 
        self.__current_frame = 0
        self.__frames = frames
        self.__done = False
        self.__loop_count = 1
+       if animation_type is not None:
+            self.animation_type = animation_type
 
-    def animate(self, oled):
-        cf = self.__current_frame # Current Frame number - used to index the frames array
-        frame = self.__frames[cf]
-
-        oled.blit(frame.image, frame.x, frame.y)
+    def forward(self):
+        """ progress the current frame """
         self.__current_frame +=1
-        
-        #change to forward and reverse
-        if self.__bouncing:
-            self.__current_frame -=1
-            if self.__current_frame == 0:
-                self.__bouncing = False
-        if self.__current_frame > len(self.__frames)-1:
-            if self.__bounce:
-                self.__bouncing = True
-                self.__current_frame -=1
-            else:
-                self.__current_frame = 0
-            if self.__loop_count > 0:
-                self.__loop_count -= 1
-            if self.__loop_count == 0:
-                self.__done = True
-                if self.__loop: self.__loop = False
-                if self.__bounce: self.__bounce = False
-        
-        # print("frame", self.__current_frame)
-    
 
+    def reverse(self):
+        self.__current_frame -=1
+    
+    def animate(self, oled):
+        """ Animates the frames based on the animation type and for the number of times specified """
+        cf = self.__current_frame # Current Frame number - used to index the frames array
+        frame = self.__frames[cf]        
+        oled.blit(frame.image, frame.x, frame.y)
+       
+        if self.__animation_type == "looping":
+            # Loop from the first frame to the last, for the number of cycles specificed, and then set done to True
+            self.forward()
+           
+            if self.__current_frame > self.frame_count:
+                self.__current_frame = 0
+                self.__loop_count -=1
+                if self.__loop_count == 0:
+                    self.__done = True
+            pass
+        if self.__animation_type == "bouncing":
+           
+            # Loop from the first frame to the last, and then back to the first again, then set done to True
+            if self.__bouncing:
+               
+                if self.__current_frame == 0:
+                    if self.__loop_count == 0:
+                        self.__done == True
+                    else:
+                        if self.__loop_count >0:
+                            self.__loop_count -=1
+                            self.forward()
+                            self.__bouncing = False
+                    if self.__loop_count == -1:
+                        # bounce infinately
+                        self.forward()
+                        self.__bouncing = False
+                if (self.__current_frame < self.frame_count) and (self.__current_frame>0):
+                    self.reverse()
+            else:
+                if self.__current_frame == 0:
+                    if self.__loop_count == 0:
+                        self.__done == True
+                    elif self.__loop_count == -1:
+                        # bounce infinatey
+                        self.forward()
+                    else:
+                        self.forward()
+                        self.__loop_count -= 1
+                elif self.__current_frame == self.frame_count:
+                    self.reverse()
+                    self.__bouncing = True
+                else:
+                    self.forward()
+            
+        if self.__animation_type == "default":
+            # loop through from first frame to last, then set done to True
+            
+            if self.__current_frame == self.frame_count:
+                self.__current_frame = 0
+                self.__done = True
+            else:
+                self.forward()
+   
+    @property
+    def frame_count(self):
+        """ Returns the total number of frames in the animation """
+        return len(self.__frames)-1
     
     @property
     def done(self):
@@ -226,23 +287,28 @@ class Animate():
         else:
             return False
 
-    def loop(self, oled, no=None):
+    def loop(self, oled, no:int=None):
         """ Loops the animation
         
         if no is None or -1 the animation will continue looping until animate.stop() is called """
         self.__loop_count = no
-        self.__loop = True
+        self.__animation_type = "loop"
 
     def stop(self):
         self.__loop_count = 0
-        self.__loop = False
-        self.__bounce = False
+        self.__bouncing = False
         self.__done = True
 
-    def bounce(self, oled, no=None):
-        """ Loops the animation forwared, then backward, the number of time specified in no """
-        self.__bounce = True
-        self.__loop_count = no
+    def bounce(self, no:int=None):
+        """ Loops the animation forwared, then backward, the number of time specified in no, if there is no number provided it will animate infinately """
+        self.__animation_type = "bouncing"
+        if no is not None:
+            self.__loop_count = no
+        else:
+            self.__loop_count = -1
+
+    
+
 
 class Button():
     __pressed = False
@@ -361,4 +427,5 @@ class Event():
                 self.__timer = -1
                 self.__timer_ms = 0
             else:
-                print("Timer Alert!")
+                # print("Timer Alert!")
+                pass

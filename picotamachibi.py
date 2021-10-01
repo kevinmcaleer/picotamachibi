@@ -36,12 +36,13 @@ def load_baby_bounce():
     bounce_animation = []
     x = 48
     y = 16
+    bounce_animation.append(Icon('baby_bounce04.pbm', width=48, height=48, x=x, y=y, name='frame01'))
     bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, x=x, y=y, name='frame01'))
     bounce_animation.append(Icon('baby_bounce02.pbm', width=48, height=48, x=x, y=y, name='frame02'))
     bounce_animation.append(Icon('baby_bounce03.pbm', width=48, height=48, x=x, y=y, name='frame03'))
-    bounce_animation.append(Icon('baby_bounce02.pbm', width=48, height=48, x=x, y=y, name='frame04'))
-    bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, x=x, y=y, name='frame05'))
-    bounce_animation.append(Icon('baby_bounce04.pbm', width=48, height=48, x=x, y=y, name='frame06'))
+    # bounce_animation.append(Icon('baby_bounce02.pbm', width=48, height=48, x=x, y=y, name='frame04'))
+    # bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, x=x, y=y, name='frame05'))
+    # bounce_animation.append(Icon('baby_bounce04.pbm', width=48, height=48, x=x, y=y, name='frame06'))
     # bounce_animation.append(Icon('baby_bounce01.pbm', width=48, height=48, name='frame07'))
     return bounce_animation
 
@@ -108,9 +109,9 @@ tb = build_toolbar()
 bounce = load_baby_bounce()
 poop_sprite = load_poop()
 eat_food = load_eat()
-poopy = Animate(frames=poop_sprite)
-baby = Animate(frames=bounce)
-eat = Animate(frames=eat_food)
+poopy = Animate(frames=poop_sprite, animation_type="default")
+baby = Animate(frames=bounce, animation_type="default")
+eat = Animate(frames=eat_food, animation_type="default")
 poop = False
 
 button_a = Button(4)
@@ -129,6 +130,8 @@ toilet = Event(name="Toilet", sprite=toilet, value=0)
 poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
 poop_event.timer = 3
 poop_event.timer_ms = 1
+
+baby.bounce()
 
 while True:
     # key = input("v & b to move selection")
@@ -186,7 +189,6 @@ while True:
             clear()
     else:
         baby.animate(oled)
-    
     if poop:
         poopy.animate(oled)
     tb.show(oled)    
@@ -194,4 +196,3 @@ while True:
     oled.show()
     sleep(0.05)
     
-
