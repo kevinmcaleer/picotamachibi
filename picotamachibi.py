@@ -26,11 +26,11 @@ firstaid = Icon('firstaid.pbm', width=16, height=16, name="firstaid")
 toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
 heart = Icon('heart.pbm', width=16, height=16, name="heart")
 call = Icon('call.pbm', width=16, height=16, name="call")
-book = Icon('book.pbm', width=16, height=16)
+# book = Icon('book.pbm', width=16, height=16)
 
-def load_baby():
-    baby = Icon('baby.pbm', width=48, height=48, name="Baby")
-    return baby
+# def load_baby():
+#     baby = Icon('baby.pbm', width=48, height=48, name="Baby")
+#     return baby
 
 def load_baby_bounce():
     bounce_animation = []
@@ -137,12 +137,14 @@ index = 0
 tb.select(index, oled)
 cancel = False
 feeding_time = False
+sleeping = False
 
 # Set up Events
 energy_increase = Event(name="Increase Energy", sprite=heart, value=1)
 firstaid = Event(name="First Aid", sprite=firstaid, value=0)
 toilet = Event(name="Toilet", sprite=toilet, value=0)
 poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
+sleep_time = Event(name="sleep time", sprite=lightbulb, value=1)
 poop_event.timer = 3
 poop_event.timer_ms = 1
 
@@ -171,6 +173,8 @@ while True:
     if button_b.is_pressed:
         if tb.selected_item == "food":
             feeding_time = True
+            sleeping = False
+            
         if tb.selected_item == "game":
             print("game")
         if tb.selected_item == "toilet":
@@ -179,10 +183,19 @@ while True:
             poop = False
             clear()
         if tb.selected_item == "lightbulb":
+            if not sleeping:
+                sleeping = True
+                sleep_time.message = "Night Night"
+                sleep_time.popup(oled)
+                clear()
+                # need to add an event that increases energy level after sleeping for 1 minute
+            else:
+                sleeping = False
             print("lightbulb")
         if tb.selected_item == "firstaid":
             firstaid.message = "Vitamins"
             firstaid.popup(oled=oled)
+
             clear()
         if tb.selected_item == "heart":
             print("heart")
@@ -205,8 +218,10 @@ while True:
             
             clear()
     else:
-        # baby.animate(oled)
-        babyzzz.animate(oled)
+        if sleeping:
+            babyzzz.animate(oled)
+        else:
+            baby.animate(oled)
     if poop:
         poopy.animate(oled)
     tb.show(oled)    

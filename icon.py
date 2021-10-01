@@ -176,6 +176,7 @@ class Animate():
     __frames = []
     __current_frame = 0
     __speed = "normal" # Other speeds are 'fast' and 'slow' - it just adds frames or skips frames
+    __speed_value = 0
     __done = False # Has the animation completed
     __loop_count = 0
     __bouncing = False
@@ -197,11 +198,14 @@ class Animate():
         if value in ['very slow','slow','normal','fast']:
             self.__speed = value
             if value == 'very slow':
-                self.__pause = 4
+                self.__pause = 10
+                self.__speed_value = 10
             if value == 'slow':
                 self.__pause = 1
+                self.__speed_value = 1
             if value == "normal":
                 self.__pause = 0
+                self.__speed_value = 0
         else:
             print(value, "is not a valid value, try 'fast','normal' or 'slow'")
 
@@ -234,10 +238,7 @@ class Animate():
                 self.__pause -= 1
             else:
                 self.__current_frame +=1
-                if self.__speed == 'very slow':
-                    self.__pause = 2
-                else:
-                    self.__pause = 1
+                self.__pause = self.__speed_value
 
         if self.__speed == 'fast':
             if self.__current_frame < self.frame_count +2:
@@ -252,11 +253,8 @@ class Animate():
             if self.__pause > 0:
                 self.__pause -= 1
             else:
-                self.__current_frame -=1
-                if self.__speed == 'very slow':
-                    self.__pause = 2
-                else:
-                    self.__pause = 1
+                self.__current_frame -=1                
+                self.__pause = self.__speed_value
         if self.__speed == 'fast':
             if self.__current_frame < self.frame_count +2:
                 self.__current_frame -=2
