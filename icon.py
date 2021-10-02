@@ -5,7 +5,7 @@ from os import listdir
 import gc
 
 class Icon():
-    
+    """ Models an icon and all the properties it requires """
     __image = None
     __x = 0
     __y = 0
@@ -14,7 +14,9 @@ class Icon():
     __height = 16
     __name = "Empty"
 
+
     def __init__(self, filename:None, width=None, height=None, x=None, y=None, name=None):
+        """ Sets up the default values """
         if width:
             self.__width = width
         if height:
@@ -31,58 +33,87 @@ class Icon():
     @property
     def image(self):
         """ gets the icon image """
+
         return self.__image
 
     @image.setter
     def image(self, buf):
         """ Sets the icon image """
+
         self.__image = buf
     
     @property
     def x(self)->int:
+        """ Gets the X value """
+
         return self.__x
+
 
     @x.setter
     def x(self, value):
+        """ Sets the X value """
+
         self.__x = value
+
 
     @property
     def width(self)->int:
+        """ Get the width"""
+
         return self.__width
+
 
     @width.setter
     def width(self, value):
         """ Sets the icon width """
+
         self.__width = value
+
 
     @property
     def height(self):
         """ Returns height """
         return self.__height
 
+
     @height.setter
     def height(self, value):
+        """ Gets the height """
+
         self.__height = value
+
 
     @property
     def name(self):
+        """ Gets the name """
+
         return self.__name
+
 
     @name.setter
     def name(self, value):
         """ Sets the icon name """
+
         self.__name = value
+
 
     @property
     def y(self)->int:
+        """ Gets the y value """
+
         return self.__y
+
 
     @y.setter
     def y(self, value):
+        """ Sets the Y value """
+
         self.__y = value
+
 
     @property
     def invert(self)->bool:
+        """ Flips the bits in the image so white become black etc and returns the image """
         print("Invert is", self.__invert)
         return self.__invert
 
@@ -115,6 +146,7 @@ class Icon():
         return fbuf
 
 class Toolbar():
+    """ Models the toolbar """
     __icon_array = []
     __framebuf = framebuf.FrameBuffer(bytearray(160*64*1), 160, 16, framebuf.MONO_HLSB)
     __spacer = 1
@@ -282,6 +314,7 @@ class Animate():
         """ progress the current frame """
         if self.__speed == 'normal':
             self.__current_frame +=1
+
         if self.__speed in ['very slow','slow']:
             if self.__pause > 0:
                 self.__pause -= 1
@@ -298,12 +331,14 @@ class Animate():
     def reverse(self):
         if self.__speed == 'normal':
             self.__current_frame -=1
+
         if self.__speed in ['very slow','slow']:
             if self.__pause > 0:
                 self.__pause -= 1
             else:
                 self.__current_frame -=1                
                 self.__pause = self.__speed_value
+
         if self.__speed == 'fast':
             if self.__current_frame < self.frame_count +2:
                 self.__current_frame -=2
@@ -325,12 +360,14 @@ class Animate():
 
     def unload(self):
         """ free up memory """
+
         self.__frames = None
         self.__cached = False
         gc.collect()
 
     def animate(self, oled):
         """ Animates the frames based on the animation type and for the number of times specified """
+
         cf = self.__current_frame # Current Frame number - used to index the frames array
         frame = self.__frames[cf]        
         oled.blit(frame.image, frame.x, frame.y)
@@ -344,7 +381,7 @@ class Animate():
                 self.__loop_count -=1
                 if self.__loop_count == 0:
                     self.__done = True
-            pass
+            
         if self.__animation_type == "bouncing":
            
             # Loop from the first frame to the last, and then back to the first again, then set done to True
@@ -405,8 +442,8 @@ class Animate():
 
     def loop(self, no:int=None):
         """ Loops the animation
-        
         if no is None or -1 the animation will continue looping until animate.stop() is called """
+
         if no is not None:
             self.__loop_count = no
         else:
@@ -419,7 +456,9 @@ class Animate():
         self.__done = True
 
     def bounce(self, no:int=None):
-        """ Loops the animation forwared, then backward, the number of time specified in no, if there is no number provided it will animate infinately """
+        """ Loops the animation forwared, then backward, the number of time specified in no,
+         if there is no number provided it will animate infinately """
+
         self.__animation_type = "bouncing"
         if no is not None:
             self.__loop_count = no
@@ -428,33 +467,43 @@ class Animate():
 
     @property
     def width(self):
+        """ Gets the icon width """
         return self.__width
     
     @width.setter
     def width(self, value):
+        """ Sets the icon width """
         self.__width = value
     
     @property
     def height(self):
+        """ Gets the icon height """
         return self.__width
     
     @height.setter
     def height(self, value):
+        """ Sets the icon height """
         self.__height = value
 
 
 class Button():
+    """ Models a button, check the status with is_pressed """
+
+    # The private variables
     __pressed = False
     __pin = 0
     __button_down = False
 
     def __init__(self, pin:int):
+        """ Sets up the button """
+
         self.__pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
         self.__pressed = False
 
     @property
     def is_pressed(self)->bool:
         """ Returns the current state of the button """
+
         if self.__pin.value() == 0:
             self.__button_down = False
             return False
@@ -467,6 +516,7 @@ class Button():
                 return False
 
 class Event():
+    """ Models events that can happen, with timers and pop up messages """
     __name = ""
     __value = 0
     __sprite = None
@@ -477,6 +527,7 @@ class Event():
 
     def __init__(self, name=None, sprite=None, value=None, callback=None):
         """ Create a new event """
+
         if name:
             self.__name = name
         if sprite:
@@ -486,37 +537,54 @@ class Event():
         if callback is not None:
             self.__callback = callback
     
+
     @property
     def name(self):
         """ Return the name of the event"""
+
         return self.__name
+
 
     @name.setter
     def name(self, value):
         """ Set the name of the Event"""
+
         self.__name = value
+
 
     @property
     def value(self):
+        """ Gets the current value """
         return self.__value
+
 
     @value.setter
     def value(self, value):
+        """ Sets the current value """
         self.__value = value
+
 
     @property
     def sprite(self):
+        """ Gets the image sprite """
+
         return self.__sprite
+
 
     @sprite.setter
     def sprite(self, value):
+        """ Sets the image sprite """
+
         self.__value = value
+
 
     @property
     def message(self):
         """ Return the message """
+
         return self.__message
     
+
     @message.setter
     def message(self, value):
         """ Set the message """
@@ -537,21 +605,34 @@ class Event():
     
     @property
     def timer(self):
+        """ Gets the current timer value """
+
         return self.__timer
+
 
     @timer.setter
     def timer(self, value):
+        """ Sets the current timer value """
+
         self.__timer = value
+
 
     @property
     def timer_ms(self):
+        """ Get the timer in MS """
+
         return self.__timer_ms
+
 
     @timer_ms.setter
     def timer_ms(self, value):
+        """ Set the timer in MS """
         self.__timer_ms = value
 
+
     def tick(self):
+        """ Progresses the animation on frame """
+
         self.__timer_ms += 1
         if self.__timer_ms >= self.__timer:
             if self.__callback is not None:
