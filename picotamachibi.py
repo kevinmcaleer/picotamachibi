@@ -32,11 +32,11 @@ def clear():
     """ Clear the screen """
     oled.fill_rect(0,0,128,64,0)
 
-def animate(frames, timer):
-    for frame in frames:
-        oled.blit(frame.image, frame.x, frame.y)
-        oled.show()
-        sleep(0.1)
+# def animate(frames, timer):
+#     for frame in frames:
+#         oled.blit(frame.image, frame.x, frame.y)
+#         oled.show()
+#         sleep(0.1)
 
 def build_toolbar():
     toolbar = Toolbar()
@@ -149,8 +149,8 @@ while True:
             heart_status.popup(oled)
             clear()
         if tb.selected_item == "call":
-            call_animate.animate(oled)
-            call_animate.set = True
+            # call_animate.animate(oled)
+            call_animate.set = False
             print("call")
 
     # Time for Poop?
