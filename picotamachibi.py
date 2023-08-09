@@ -9,14 +9,12 @@ import gc
 sda = Pin(0)
 scl = Pin(1)
 buzzer = PWM(Pin(16))
-
 id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
 
 oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
 oled.init_display()
-
 
 health = 1
 happiness = 1
