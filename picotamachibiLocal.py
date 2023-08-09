@@ -1,6 +1,6 @@
 # from icons import food_icon
 from machine import I2C, Pin, PWM
-from ssd1306 import SSD1306_I2C
+from sh1106 import SH1106_I2C #from ssd1306 import SSD1306_I2C
 from icon import Animate, Icon, Toolbar, Button, Event
 from time import sleep
 import framebuf
@@ -14,13 +14,14 @@ id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
 
-oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
+oled = SH1106_I2C(width=128, height=64, i2c=i2c)#oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
 oled.init_display()
 
 
 health = 1
 happiness = 1
 energy = 1
+volume = 1000
 
 # load icons
 food = Icon('food.pbm', width=16, height=16, name="food")
@@ -44,7 +45,7 @@ def clear():
 def buzz(freq, duration = 0.03):
     """ Run the buzzer at a given frequency and duration """
     buzzer.freq(freq)
-    buzzer.duty_u16(1000)
+    buzzer.duty_u16(volume)
     sleep(duration)
     buzzer.duty_u16(0)
 
@@ -104,6 +105,11 @@ go_potty.load()
 while True:
     if not cancel:
         tb.unselect(index, oled)
+#     if (button_a.is_pressed and button_b.is_pressed):
+#         if volume == 1000:
+#             volume = 0
+#         else:
+#             volume = 1000
     if button_a.is_pressed:
         buzz(1000)
         buzz(600)
