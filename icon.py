@@ -637,7 +637,7 @@ class Event():
         if self.__timer_ms >= self.__timer:
             if self.__callback is not None:
                 print("poop check callback")
-                self.__callback
+                self.__callback()
                 self.__timer = -1
                 self.__timer_ms = 0
             else:
