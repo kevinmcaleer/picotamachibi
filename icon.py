@@ -6,111 +6,23 @@ import gc
 
 class Icon():
     """ Models an icon and all the properties it requires """
-    __image = None
-    __x = 0
-    __y = 0
+    image = None # the image data type buf
+    x = 0
+    y = 0
     __invert = False
-    __width = 16
-    __height = 16
-    __name = "Empty"
-
+    width = 16
+    height = 16
+    name = "Empty"
 
     def __init__(self, filename:None, width=None, height=None, x=None, y=None, name=None):
         """ Sets up the default values """
-        if width:
-            self.__width = width
-        if height:
-            self.__height = height
-        if name:
-            self.__name = name
-        if x:
-            self.__x = x
-        if y:
-            self.__y = y
-        if filename is not None:
-            self.__image = self.loadicons(filename)
-
-    @property
-    def image(self):
-        """ gets the icon image """
-
-        return self.__image
-
-    @image.setter
-    def image(self, buf):
-        """ Sets the icon image """
-
-        self.__image = buf
+        if width: self.width = width
+        if height: self.height = height
+        if name: self.name = name
+        if x: self.x = x
+        if y: self.y = y
+        if filename is not None: self.image = self.loadicons(filename)
     
-    @property
-    def x(self)->int:
-        """ Gets the X value """
-
-        return self.__x
-
-
-    @x.setter
-    def x(self, value):
-        """ Sets the X value """
-
-        self.__x = value
-
-
-    @property
-    def width(self)->int:
-        """ Get the width"""
-
-        return self.__width
-
-
-    @width.setter
-    def width(self, value):
-        """ Sets the icon width """
-
-        self.__width = value
-
-
-    @property
-    def height(self):
-        """ Returns height """
-        return self.__height
-
-
-    @height.setter
-    def height(self, value):
-        """ Gets the height """
-
-        self.__height = value
-
-
-    @property
-    def name(self):
-        """ Gets the name """
-
-        return self.__name
-
-
-    @name.setter
-    def name(self, value):
-        """ Sets the icon name """
-
-        self.__name = value
-
-
-    @property
-    def y(self)->int:
-        """ Gets the y value """
-
-        return self.__y
-
-
-    @y.setter
-    def y(self, value):
-        """ Sets the Y value """
-
-        self.__y = value
-
-
     @property
     def invert(self)->bool:
         """ Flips the bits in the image so white become black etc and returns the image """
@@ -121,7 +33,7 @@ class Icon():
     def invert(self, value:bool):
         """ Inverts the icon colour """
         
-        image = self.__image
+        image = self.image
         for x in range(0,self.width):
             for y in range(0, self.height):
                 pxl = image.pixel(x,y)
@@ -130,7 +42,7 @@ class Icon():
                 else:
                     image.pixel(x,y,0)
                 
-        self.__image = image
+        self.image = image
         self.__invert = value
         # print("Invert is", self.__invert)
 
@@ -141,15 +53,23 @@ class Icon():
             f.readline() # creator comment
             f.readline() # dimensions
             data = bytearray(f.read())
-        fbuf = framebuf.FrameBuffer(data, self.__width,self.__height, framebuf.MONO_HLSB)
+        frame_buffer = framebuf.FrameBuffer(data, self.width,self.height, framebuf.MONO_HLSB)
         # print(self.__name, self.__width, self.__height)
-        return fbuf
+        return frame_buffer
+
+    def loadicon2(self, library, icon_data):
+        __import__(library, icon_data)
+        # frame_buffer = framebuf.FrameBuffer(name, self.width,self.height, framebuf.MONO_HLSB)
+        # frame_buffer = bytearray(self.width * self.height // 8)
+        frame_buffer = bytearray(icon_data)
+        return frame_buffer
+        
 
 class Toolbar():
     """ Models the toolbar """
     __icon_array = []
     __framebuf = framebuf.FrameBuffer(bytearray(160*64*1), 160, 16, framebuf.MONO_HLSB)
-    __spacer = 1
+    spacer = 1
     __selected_item = None
     __selected_index = -1 # -1 means no item selected
   
@@ -179,18 +99,10 @@ class Toolbar():
             x += icon.width + self.spacer
         return fb
 
-    @property
-    def spacer(self):
-        """ returns the spacer value"""
-        return self.__spacer
-
-    @spacer.setter
-    def spacer(self, value):
-        """ Sets the spacer value"""
-        self.__spacer = value
-
-    def show(self, oled):
-        oled.blit(self.data, 0,0)
+    def show(self, display):
+        display.set_framebuffer(self.data)
+        
+#         oled.blit(self.data, 0,0)
         # oled.show()
     
     def select(self, index, oled):
@@ -228,7 +140,7 @@ class Animate():
     __width = 16
     __height = 16
     __cached = False
-    __filename = None
+    filename = None
     """ other animations types: 
         - loop
         - bounce
@@ -298,17 +210,7 @@ class Animate():
        if animation_type is not None:
             self.animation_type = animation_type
        if filename:
-           self.__filename = filename 
-
-    @property
-    def filename(self):
-        """ Returns the current filename"""
-        return self.__filename
-
-    @filename.setter
-    def filename(self, value):
-        """ Sets the filename """
-        self.__filename = value
+           self.filename = filename 
 
     def forward(self):
         """ progress the current frame """
@@ -353,7 +255,7 @@ class Animate():
             files = listdir()
             array = []
             for file in files:
-                if (file.startswith(self.__filename)) and (file.endswith('.pbm')):
+                if (file.startswith(self.filename)) and (file.endswith('.pbm')):
                     array.append(Icon(filename=file, width=self.__width, height=self.__height, x=self.__x, y=self.__y, name=file))
             self.__frames = array
             self.__cached = True
@@ -517,80 +419,27 @@ class Button():
 
 class Event():
     """ Models events that can happen, with timers and pop up messages """
-    __name = ""
-    __value = 0
-    __sprite = None
-    __timer = -1 # -1 means no timer set
-    __timer_ms = 0
+    name = ""
+    value = 0
+    sprite = None
+    timer = -1 # -1 means no timer set
+    timer_ms = 0
     __callback = None
-    __message = ""
+    message = ""
 
     def __init__(self, name=None, sprite=None, value=None, callback=None):
         """ Create a new event """
 
         if name:
-            self.__name = name
+            self.name = name
         if sprite:
-            self.__sprite = sprite
+            self.sprite = sprite
         if value:
-            self.__value = value
+            self.value = value
         if callback is not None:
             self.__callback = callback
     
-
-    @property
-    def name(self):
-        """ Return the name of the event"""
-
-        return self.__name
-
-
-    @name.setter
-    def name(self, value):
-        """ Set the name of the Event"""
-
-        self.__name = value
-
-
-    @property
-    def value(self):
-        """ Gets the current value """
-        return self.__value
-
-
-    @value.setter
-    def value(self, value):
-        """ Sets the current value """
-        self.__value = value
-
-
-    @property
-    def sprite(self):
-        """ Gets the image sprite """
-
-        return self.__sprite
-
-
-    @sprite.setter
-    def sprite(self, value):
-        """ Sets the image sprite """
-
-        self.__value = value
-
-
-    @property
-    def message(self):
-        """ Return the message """
-
-        return self.__message
-    
-
-    @message.setter
-    def message(self, value):
-        """ Set the message """
-        self.__message = value
-
-    def popup(self, oled):
+    def popup(self, display):
         # display popup window
         # show sprite
         # show message
@@ -599,47 +448,22 @@ class Event():
         fbuf.rect(0,0,128,48, 1)
         fbuf.blit(self.sprite.image, 5, 10)
         fbuf.text(self.message, 32, 18)
-        oled.blit(fbuf, 0, 16)
-        oled.show()
+        display.set_framebuffer(fbuf,0,16)
+#         oled.blit(fbuf, 0, 16)
+        display.update()
+#         oled.show()
         sleep(2)
     
-    @property
-    def timer(self):
-        """ Gets the current timer value """
-
-        return self.__timer
-
-
-    @timer.setter
-    def timer(self, value):
-        """ Sets the current timer value """
-
-        self.__timer = value
-
-
-    @property
-    def timer_ms(self):
-        """ Get the timer in MS """
-
-        return self.__timer_ms
-
-
-    @timer_ms.setter
-    def timer_ms(self, value):
-        """ Set the timer in MS """
-        self.__timer_ms = value
-
-
     def tick(self):
         """ Progresses the animation on frame """
 
-        self.__timer_ms += 1
-        if self.__timer_ms >= self.__timer:
+        self.timer_ms += 1
+        if self.timer_ms >= self.timer:
             if self.__callback is not None:
                 print("poop check callback")
                 self.__callback
-                self.__timer = -1
-                self.__timer_ms = 0
+                self.timer = -1
+                self.timer_ms = 0
             else:
                 # print("Timer Alert!")
                 pass

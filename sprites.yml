@@ -1,0 +1,63 @@
+- name: baby_bounce
+  files:
+   - baby_bounce01.pbm
+   - baby_bounce02.pbm
+   - baby_bounce03.pbm
+   - baby_bounce04.pbm
+- name: baby_zzz
+  files:
+   - baby_zzz01.pbm
+   - baby_zzz02.pbm
+   - baby_zzz03.pbm
+   - baby_zzz04.pbm
+- name: misc
+  files:
+   - baby.pbm
+   - book.pbm
+   - bubble.pbm
+   - call.pbm
+   - call_animate01.pbm
+   - call_animate03.pbm
+   - firstaid.pbm
+   - food.pbm
+   - game.pbm
+   - heart.pbm
+   - heart_plus.pbm
+   - lightbulb.pbm
+   - toilet.pbm
+- name: eat
+  files:
+   - eat01.pbm
+   - eat02.pbm
+   - eat03.pbm
+   - eat04.pbm
+   - eat05.pbm
+   - eat06.pbm
+   - eat07.pbm
+   - eat08.pbm
+- name: poop
+  files:
+   - poop01.pbm
+   - poop02.pbm
+   - poop03.pbm
+   - poop04.pbm
+- name: potty
+  files:
+   - potty01.pbm
+   - potty02.pbm
+   - potty03.pbm
+   - potty04.pbm
+   - potty05.pbm
+   - potty06.pbm
+   - potty07.pbm
+   - potty08.pbm
+   - potty09.pbm
+   - potty10.pbm
+   - potty11.pbm
+   - potty12.pbm
+   - potty13.pbm
+   - potty14.pbm
+- name: skull
+  files:
+   - skull01.pbm
+   - skull02.pbm
