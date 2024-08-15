@@ -1,5 +1,5 @@
 # from icons import food_icon
-from machine import I2C, Pin
+from machine import I2C, Pin, PWM
 from ssd1306 import SSD1306_I2C
 from icon import Animate, Icon, Toolbar, Button, Event
 from time import sleep
@@ -8,6 +8,7 @@ import gc
 
 sda = Pin(0)
 scl = Pin(1)
+buzzer = PWM(Pin(16))
 id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
@@ -37,6 +38,13 @@ def clear():
 #         oled.blit(frame.image, frame.x, frame.y)
 #         oled.show()
 #         sleep(0.1)
+
+def buzz(freq, duration = 0.03):
+    """ Run the buzzer at a given frequency and duration """
+    buzzer.freq(freq)
+    buzzer.duty_u16(1000)
+    sleep(duration)
+    buzzer.duty_u16(0)
 
 def build_toolbar():
     toolbar = Toolbar()
@@ -95,11 +103,15 @@ while True:
     if not cancel:
         tb.unselect(index, oled)
     if button_a.is_pressed:
+        buzz(1000)
+        buzz(600)
         index += 1
         if index == 7:
             index = 0
         cancel = False
     if button_x.is_pressed:
+        buzz(600)
+        buzz(1000)
         cancel = True
         index = -1
     
@@ -107,6 +119,10 @@ while True:
         tb.select(index, oled)
 
     if button_b.is_pressed:
+        buzz(1300)
+        buzz(1500)
+        buzz(1700)
+        buzz(1900)
         if tb.selected_item == "food":
             feeding_time = True
             sleeping = False
