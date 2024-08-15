@@ -16,12 +16,18 @@ class Icon():
 
     def __init__(self, filename:None, width=None, height=None, x=None, y=None, name=None):
         """ Sets up the default values """
-        if width: self.width = width
-        if height: self.height = height
-        if name: self.name = name
-        if x: self.x = x
-        if y: self.y = y
-        if filename is not None: self.image = self.loadicons(filename)
+        if width: 
+            self.width = width
+        if height: 
+            self.height = height
+        if name: 
+            self.name = name
+        if x: 
+            self.x = x
+        if y: 
+            self.y = y
+        if filename is not None: 
+            self.image = self.loadicons(filename)
     
     @property
     def invert(self)->bool:
@@ -91,9 +97,9 @@ class Toolbar():
         for icon in self.__icon_array:
             # print("x:",x)
             count += 1
-            if type(icon) == Icon:
+            if type(icon) is Icon: # check if the icon is a static icon
                 self.__framebuf.blit(icon.image, x, 0) 
-            if type(icon) == Animate:
+            if type(icon) is Animate: # check if the icon is an animated icon
                 self.__framebuf.blit(icon.__frames[icon.__current_frame].image, x, 0)
             fb = self.__framebuf
             x += icon.width + self.spacer
@@ -153,7 +159,7 @@ class Animate():
     @set.setter
     def set(self, value:bool):
         self.__set = value
-        if value == True:
+        if value: # if value is True
             self.load()
         else:
             self.unload()
@@ -291,7 +297,7 @@ class Animate():
                
                 if self.__current_frame == 0:
                     if self.__loop_count == 0:
-                        self.__done == True
+                        self.__done = True
                     else:
                         if self.__loop_count >0:
                             self.__loop_count -=1
@@ -306,7 +312,7 @@ class Animate():
             else:
                 if self.__current_frame == 0:
                     if self.__loop_count == 0:
-                        self.__done == True
+                        self.__done = True
                     elif self.__loop_count == -1:
                         # bounce infinatey
                         self.forward()
