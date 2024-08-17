@@ -1,6 +1,6 @@
 # from icons import food_icon
 from machine import I2C, Pin
-from ssd1306 import SSD1306_I2C
+from gui.ssd1306 import SSD1306_I2C
 from icon import Animate, Icon, Toolbar, Button, Event
 from time import sleep
 import framebuf
@@ -12,7 +12,9 @@ id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
 
-oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
+print("creating oled")
+oled = SSD1306_I2C(width=128, height=32, i2c=i2c)
+print("Initialising display")
 oled.init_display()
 
 health = 1

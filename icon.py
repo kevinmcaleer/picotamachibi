@@ -60,7 +60,7 @@ class Icon():
             f.readline() # dimensions
             data = bytearray(f.read())
         frame_buffer = framebuf.FrameBuffer(data, self.width,self.height, framebuf.MONO_HLSB)
-        # print(self.__name, self.__width, self.__height)
+        print(self.name, self.width, self.height)
         return frame_buffer
 
     def loadicon2(self, library, icon_data):
@@ -106,9 +106,12 @@ class Toolbar():
         return fb
 
     def show(self, display):
-        display.set_framebuffer(self.data)
+        if self.data is None:
+            print(f"Data is None")
+            raise ValueError
+#         display.set_framebuffer(self.data)
         
-#         oled.blit(self.data, 0,0)
+        display.blit(self.data, 0,0)
         # oled.show()
     
     def select(self, index, oled):
@@ -199,7 +202,7 @@ class Animate():
 
     def __init__(self, frames=None, animation_type:str=None,x:int=None,y:int=None, width:int=None, height:int=None, filename=None):
        """ setup the animation """ 
-
+       print(f"initialising animation: {filename}")
        if x:
            self.__x = x
        if y:
@@ -405,7 +408,7 @@ class Button():
     def __init__(self, pin:int):
         """ Sets up the button """
 
-        self.__pin = Pin(pin, Pin.IN, Pin.PULL_DOWN)
+        self.__pin = Pin(pin, Pin.IN, Pin.PULL_UP)
         self.__pressed = False
 
     @property
@@ -413,12 +416,12 @@ class Button():
         """ Returns the current state of the button """
 
         if self.__pin.value() == 0:
-            self.__button_down = False
+            self.__button_down = True
             return False
         if self.__pin.value() == 1:
             if not self.__button_down:
                 # print("button pressed")
-                self.__button_down = True
+                self.__button_down = False
                 return True
             else:
                 return False
