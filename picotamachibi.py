@@ -1,10 +1,10 @@
 # from icons import food_icon
 from machine import I2C, Pin
-from gui.ssd1306 import SSD1306_I2C
-from icon import Animate, Icon, Toolbar, Button, Event
+from gui.ssd1306 import *
+from icon import Animate, Icon, Toolbar, Button, Event, GameState
 from time import sleep
 import framebuf
-import gc
+from random import randint
 
 sda = Pin(0)
 scl = Pin(1)
@@ -12,14 +12,9 @@ id = 0
 
 i2c = I2C(id=id, sda=sda, scl=scl)
 
-print("creating oled")
-oled = SSD1306_I2C(width=128, height=32, i2c=i2c)
-print("Initialising display")
+oled = SSD1306_I2C(width=128, height=64, i2c=i2c)
 oled.init_display()
-
-health = 1
-happiness = 1
-energy = 1
+print(f"oled: {oled}")
 
 # load icons
 food = Icon('food.pbm', width=16, height=16, name="food")
@@ -30,17 +25,45 @@ toilet = Icon('toilet.pbm', width=16, height=16, name="toilet")
 heart = Icon('heart.pbm', width=16, height=16, name="heart")
 call = Icon('call.pbm', width=16, height=16, name="call")
 
+# Set Animations
+poopy =    Animate(x=96, y=48, width=16, height=16, filename='poop')
+baby =     Animate(x=48, y=16, width=16, height=16, animation_type="bounce",  filename='baby_bounce')
+eat =      Animate(x=48, y=16, width=48, height=48, filename='eat')
+babyzzz =  Animate(x=48, y=16, animation_type="loop", filename='baby_zzz')
+death =    Animate(x=48, y=16, animation_type='bounce', filename="skull")
+go_potty = Animate(filename="potty", animation_type='bounce',x=64,y=16, width=48, height=48)
+
+# Set the game state
+gamestate = GameState()
+
+# Append states to the states dictionary
+gamestate.states["sleeping"] = False      # Baby is not sleeping
+gamestate.states["feeding_time"] = False  # Baby is not eating
+gamestate.states["cancel"] = False 
+gamestate.states["health"] = 1
+gamestate.states["happiness"] = 1
+gamestate.states["sleepiness"] = 1
+
+def wakeup():
+    gamestate.states["sleepiness"] = 0
+    gamestate.states["sleeping"] = False
+    gamestate.states["happiness"] += 1
+    gamestate.states["health"] += 1
+    babyzzz.set = False
+    baby.set = True
+    print("Waking up")
+    
+def poop_check():
+    go_potty.loop(no=1)
+    go_potty.set = True
+    print("poop time")
+    
 def clear():
     """ Clear the screen """
     oled.fill_rect(0,0,128,64,0)
 
-# def animate(frames, timer):
-#     for frame in frames:
-#         oled.blit(frame.image, frame.x, frame.y)
-#         oled.show()
-#         sleep(0.1)
-
 def build_toolbar():
+    print("building toolbar")
     toolbar = Toolbar()
     toolbar.spacer = 2
     toolbar.additem(food)    
@@ -52,165 +75,164 @@ def build_toolbar():
     toolbar.additem(call)
     return toolbar
 
+def do_toolbar_stuff():
+    global sleeping
+    if tb.selected_item == "food":
+            gamestate.states["feeding_time"] = True
+            gamestate.states["sleeping"] = False
+            
+    if tb.selected_item == "game":
+        print("game")
+    if tb.selected_item == "toilet":
+        toilet.message = "Cleaning..."
+        toilet.popup(oled)
+        poopy.set = False
+        baby.set = True
+        clear()
+        baby.animate(oled)
+        poop_event.start(randint(10000, 30000))
+    if tb.selected_item == "lightbulb":
+        # Sleeping
+        if not gamestate.states["sleeping"]:
+            gamestate.states["sleeping"] = True
+            baby.set = False
+            babyzzz.set = True
+#             babyzzz.load()
+            sleep_time.message = "Night Night"
+            sleep_time.popup(oled)
+            clear()
+            sleep_time.start(1000) # sleep for 1 second
+            # need to add an event that increases energy level after sleeping for 1 minute
+        else:
+            gamestate.states["sleeping"] = False
+            babyzzz.unload()
+        print("lightbulb")
+    if tb.selected_item == "firstaid":
+        firstaid.message = "Vitamins"
+        firstaid.popup(oled)
+        gamestate.states["health"] += 1
+#         health += 1
+        clear()
+    if tb.selected_item == "heart":
+#             print("heart")
+        gamestate.states["happiness"] += 1
+
+    if tb.selected_item == "call":
+#             print("call")
+        pass
+
+def update_gamestate():
+#     global feeding_time
+    print(gamestate)
+    if gamestate.states["feeding_time"]:
+#         eat.load()
+        eat.set = True
+        if not eat.done:
+            eat.animate(oled)
+        if gamestate.states["feeding_time"] and eat.done:
+            gamestate.states["feeding_time"] = False
+            energy_increase.message = "ENERGY + 1"
+            energy_increase.popup(oled)
+            gamestate.states["health"] += 1
+            gamestate.states["happiness"] += 1
+            
+            clear()
+#             eat.unload()
+            eat.set = False
+            baby.set = True
+    
+        
+    if gamestate.states["sleeping"]:
+#             babyzzz.load()
+        babyzzz.set = True
+        babyzzz.animate(oled)
+#             print(f"baby is sleeping")
+#             sleep_time.tick()
+#             if sleep_time.done:
+#                 gamestate.states["sleeping"] = False
+#                 baby.set = True
+#                 babyzzz.set = False
+                
+    if go_potty.set:
+        go_potty.animate(oled)
+    if go_potty.done:
+        go_potty.set = False
+        poopy.set = True
+        baby.set = True
+#             babyzzz.unload()
+    if baby.set:
+        baby.animate(oled)
+    if poopy.set:
+#         poopy.load()
+        poopy.animate(oled)
+        
+    if death.set:
+#         print(f"Death set is {death.set}")
+        death.animate(oled)
+        
 tb = build_toolbar()
-poopy = Animate(x=96,y=48, width=16, height=16, filename='poop')
-baby = Animate(x=48,y=16, width=48, height=48, filename='baby_bounce', animation_type='bounce')
-eat = Animate(x=48,y=16, width=48, height=48, filename='eat')
-babyzzz = Animate(animation_type="loop", x=48,y=16, width=48, height=48, filename='baby_zzz')
-death = Animate(animation_type='bounce', x=40,y=16, width=16, height=16, filename="skull")
-go_potty = Animate(filename="potty", animation_type='bounce',x=64,y=16, width=48, height=48)
-call_animate = Animate(filename='call_animate', width=16, height=16, x=108, y=0)
-call_animate.speed = 'very slow'
 
-button_a = Button(4)
+# Setup buttons
+button_a = Button(2)
 button_b = Button(3)
-button_x = Button(2)
+button_x = Button(4)
 
+# Set toolbar index
 index = 0
+
+# Set the toolbar
 tb.select(index, oled)
-cancel = False
-feeding_time = False
-sleeping = False
-death.set = True
 
 # Set up Events
 energy_increase = Event(name="Increase Energy", sprite=heart, value=1)
 firstaid = Event(name="First Aid", sprite=firstaid, value=0)
 toilet = Event(name="Toilet", sprite=toilet, value=0)
-# poop_event = Event(name="poop time", sprite=poop_sprite, callback=poop_check())
-sleep_time = Event(name="sleep time", sprite=lightbulb, value=1)
-heart_status = Event(name="Status", sprite=heart)
+poop_event = Event(name="poop time", sprite=toilet, callback=poop_check)
+poop_event.start(randint(1000, 5000))
+sleep_time = Event(name="sleep time", sprite=lightbulb, value=1, callback=wakeup)
 # poop_event.timer = 3
 # poop_event.timer_ms = 1
 
 baby.bounce()
 poopy.bounce()
 death.loop(no=-1)
-death.speed='slow'
+death.speed='very slow'
 babyzzz.speed = 'very slow'
-go_potty.loop(no=1)
-go_potty.set = True
+# go_potty.loop(no=1)
+# go_potty.set = True
 poopy.set = False
-go_potty.load()
+# go_potty.load() # duplicate if go_potty.set is True
 
+death.set = True
+baby.set = True
+
+# Main Game Loop
 while True:
-    if not cancel:
+    key = ' '
+#     baby.animate(oled)
+
+    if not gamestate.states["cancel"]:
         tb.unselect(index, oled)
+        
     if button_a.is_pressed:
         index += 1
         if index == 7:
             index = 0
-        cancel = False
+        gamestate.states["cancel"] = False
+        
     if button_x.is_pressed:
-        cancel = True
+        gamestate.states["cancel"] = True
         index = -1
     
-    if not cancel:
+    if not gamestate.states["cancel"]:
         tb.select(index, oled)
 
     if button_b.is_pressed:
-        if tb.selected_item == "food":
-            feeding_time = True
-            sleeping = False
-            baby.unload()
-            
-        if tb.selected_item == "game":
-            print("game")
-        if tb.selected_item == "toilet":
-            toilet.message = "Cleaning..."
-            toilet.popup(oled=oled)
-            poopy.set = False
-            baby.set = True
-            happiness += 1
-            clear()
-            poopy.unload()
-        if tb.selected_item == "lightbulb":
-            if not sleeping:
-                sleeping = True
-                babyzzz.load()
-                sleep_time.message = "Night Night"
-                sleep_time.popup(oled)
-                clear()
-                # need to add an event that increases energy level after sleeping for 1 minute
-            else:
-                sleeping = False
-                babyzzz.unload()
-            print("lightbulb")
-        if tb.selected_item == "firstaid":
-            firstaid.message = "Vitamins"
-            firstaid.popup(oled=oled)
-            health += 1
+        do_toolbar_stuff()
 
-            clear()
-        if tb.selected_item == "heart":
-            heart_status.message = "health = " + str(health)
-            heart_status.popup(oled)
-            heart_status.message = "happy = " + str(happiness)
-            heart_status.popup(oled)
-            heart_status.message = "energy = " + str(energy)
-            heart_status.popup(oled)
-            clear()
-        if tb.selected_item == "call":
-            # call_animate.animate(oled)
-            call_animate.set = False
-            print("call")
+    update_gamestate()
 
-    # Time for Poop?
-    # poop_check()
-    # poop_event.tick()
-
-    if feeding_time:
-        eat.load()
-        if not eat.done:
-            eat.animate(oled)
-        if feeding_time and eat.done:
-            feeding_time = False
-            energy_increase.message = "ENERGY + 1"
-            energy_increase.popup(oled=oled)
-            energy += 1
-            
-            clear()
-            eat.unload()
-            baby.load()
-    else:
-        if sleeping:
-            babyzzz.animate(oled)
-        else:
-            if baby.set:
-                baby.load()
-                baby.animate(oled)
-            if go_potty.set:
-                go_potty.animate(oled)
-            if go_potty.done:
-                print("potty done")
-                go_potty.set = False
-                poopy.set = True
-                baby.load()
-                baby.bounce(no=-1)
-                baby.set = True
-    if (energy <= 1) and (happiness <= 1) and (health <=1):
-        death.set = True
-    else:
-        death.set = False
-
-    if (energy <= 1) or (happiness <= 1) or (health <= 1):
-        # set the toolbar call icon to flash
-        call_animate.set = True
-    else:
-        call_animate.set = False
-
-    if poopy.set:
-        poopy.load()
-        poopy.animate(oled)
-    if death.set:
-        death.animate(oled)
-    tb.show(oled)  
-    if index == 6:
-        tb.select(index, oled)
-    else:
-        if call_animate.set:
-            call_animate.animate(oled)        
-         
+    tb.show(oled)    
     oled.show()
     sleep(0.05)
     

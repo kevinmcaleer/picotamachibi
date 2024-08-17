@@ -1,5 +1,5 @@
 import framebuf
-from machine import Pin
+from machine import Pin, Timer
 from time import sleep
 from os import listdir
 import gc
@@ -167,7 +167,6 @@ class Animate():
         else:
             self.unload()
             
-
     @property
     def speed(self):
         """ Returns the current speed """
@@ -279,8 +278,8 @@ class Animate():
     def animate(self, oled):
         """ Animates the frames based on the animation type and for the number of times specified """
 
-        cf = self.__current_frame # Current Frame number - used to index the frames array
-        frame = self.__frames[cf]        
+        current_frame = self.__current_frame # Current Frame number - used to index the frames array
+        frame = self.__frames[current_frame]        
         oled.blit(frame.image, frame.x, frame.y)
        
         if self.__animation_type == "loop":
@@ -289,7 +288,7 @@ class Animate():
            
             if self.__current_frame > self.frame_count:
                 self.__current_frame = 0
-                self.__loop_count -=1
+                self.__loop_count -= 1
                 if self.__loop_count == 0:
                     self.__done = True
             
@@ -346,7 +345,7 @@ class Animate():
     def done(self):
         """ Has the animation completed """
         if self.__done:
-            self.__done = False
+            self.__done = False # reset the done flag to false
             return True
         else:
             return False
@@ -367,7 +366,7 @@ class Animate():
         self.__done = True
 
     def bounce(self, no:int=None):
-        """ Loops the animation forwared, then backward, the number of time specified in no,
+        """ Loops the animation forward, then backward, the number of time specified in no,
          if there is no number provided it will animate infinately """
 
         self.__animation_type = "bouncing"
@@ -417,14 +416,17 @@ class Button():
 
         if self.__pin.value() == 0:
             self.__button_down = True
-            return False
+            print("button pressed")
+            return True
         if self.__pin.value() == 1:
-            if not self.__button_down:
-                # print("button pressed")
-                self.__button_down = False
-                return True
-            else:
-                return False
+            self.__button_down = False
+            return False
+            # if not self.__button_down:
+                
+            #     self.__button_down = False
+            #     return True
+            # else:
+            #     return False
 
 class Event():
     """ Models events that can happen, with timers and pop up messages """
@@ -435,6 +437,8 @@ class Event():
     timer_ms = 0
     __callback = None
     message = ""
+    done = False
+    _timer_instance = None # holds the timer instance
 
     def __init__(self, name=None, sprite=None, value=None, callback=None):
         """ Create a new event """
@@ -457,9 +461,9 @@ class Event():
         fbuf.rect(0,0,128,48, 1)
         fbuf.blit(self.sprite.image, 5, 10)
         fbuf.text(self.message, 32, 18)
-        display.set_framebuffer(fbuf,0,16)
+        display.blit(fbuf,0,16)
 #         oled.blit(fbuf, 0, 16)
-        display.update()
+        display.show()
 #         oled.show()
         sleep(2)
     
@@ -475,4 +479,43 @@ class Event():
                 self.timer_ms = 0
             else:
                 # print("Timer Alert!")
-                pass
+                self.done = True
+    def reset(self):
+        self.done = False
+        
+    def start(self, duration):
+        """ Start a timer that will run a callback routine when complete """
+        print(f"Starting Timer for {duration/1000} seconds")
+        self.done = False
+
+        if self._timer_instance:
+            self._timer_instance.deinit()  # Stop any previous timer
+        
+        self._timer_instance = Timer(-1)  # Create a one-shot timer
+        self._timer_instance.init(period=duration, mode=Timer.ONE_SHOT, callback=self._timer_callback)
+
+    def _timer_callback(self, t):
+        """ Internal method to handle the timer callback """
+        if self.__callback:
+            print("Timer completed, executing callback.")
+            self.__callback()
+        else:
+            print("Timer complete, but no callback")
+        self.done = True
+#         self.timer = -1
+
+class GameState():
+    states = {}
+    
+    def __init__(self):
+        pass
+    
+    def __str__(self):
+        """ shows the current game state """
+        message = "Game State: "
+#         for state in self.states:
+#             message += ", ".join(f"{key}: {value}" for key, value in self.states.items())
+        message += ", ".join(f"{key}: {value}" for key, value in self.states.items())
+        message += "."
+        return message
+        
