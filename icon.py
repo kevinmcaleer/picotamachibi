@@ -395,6 +395,9 @@ class Animate():
         """ Sets the icon height """
         self.__height = value
 
+    def __str__(self):
+        message = f"Animate: {self.filename}, {self.__current_frame}, {self.__loop_count}, {self.__done}, x: {self.__x}, y: {self.__y}"
+        return message
 
 class Button():
     """ Models a button, check the status with is_pressed """
@@ -485,7 +488,7 @@ class Event():
         
     def start(self, duration):
         """ Start a timer that will run a callback routine when complete """
-        print(f"Starting Timer for {duration/1000} seconds")
+#         print(f"Starting Timer for {duration/1000} seconds")
         self.done = False
 
         if self._timer_instance:
@@ -497,10 +500,10 @@ class Event():
     def _timer_callback(self, t):
         """ Internal method to handle the timer callback """
         if self.__callback:
-            print("Timer completed, executing callback.")
+#             print("Timer completed, executing callback.")
             self.__callback()
-        else:
-            print("Timer complete, but no callback")
+#         else:
+#             print("Timer complete, but no callback")
         self.done = True
 #         self.timer = -1
 
