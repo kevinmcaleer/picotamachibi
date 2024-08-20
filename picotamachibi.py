@@ -139,7 +139,6 @@ def do_toolbar_stuff():
         firstaid.message = "Vitamins"
         firstaid.popup(oled)
         gamestate.states["health"] += 1
-#         health += 1
         clear()
     if tb.selected_item == "heart":
 #             print("heart")
